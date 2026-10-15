@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truco Paulista Acessível</title>
+    <meta name="description" content="Jogo de Truco Paulista online 100% acessível para leitores de tela com suporte completo a teclado, efeitos sonoros e narração por voz.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Link para pular direto para o conteúdo principal (essencial para leitor de tela) -->
+    <a href="#main-game" class="skip-link">Pular para o jogo principal</a>
+
+    <!-- Região Live ARIA para anúncios prioritários e leitura de tela -->
+    <div id="sr-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="app-container">
+        <!-- Barra de Acessibilidade Superior -->
+        <header class="top-bar" role="banner">
+            <h1 class="game-title">
+                <span class="suit-icon" aria-hidden="true">♠</span>
+                Truco Paulista Acessível
+                <span class="suit-icon" aria-hidden="true">♥</span>
+            </h1>
+
+            <nav class="accessibility-toolbar" aria-label="Ferramentas de acessibilidade e controle de som">
+                <button id="btn-status-summary" class="tool-btn" type="button" title="Atalho: Tecla S" aria-label="Ouvir resumo completo da partida (Atalho tecla S)">
+                    📢 <span class="btn-text">Resumo (S)</span>
+                </button>
+
+                <button id="btn-sound-toggle" class="tool-btn" type="button" aria-pressed="true" aria-label="Efeitos Sonoros: Ativados (Atalho tecla M)">
+                    🔊 <span class="btn-text">Som (M)</span>
+                </button>
+
+                <button id="btn-voice-toggle" class="tool-btn" type="button" aria-pressed="true" aria-label="Narração de Voz: Ativada (Atalho tecla V)">
+                    🗣️ <span class="btn-text">Voz (V)</span>
+                </button>
+
+                <button id="btn-contrast-toggle" class="tool-btn" type="button" aria-pressed="false" aria-label="Alternar Alto Contraste">
+                    👁️ <span class="btn-text">Alto Contraste</span>
+                </button>
+
+                <button id="btn-open-help" class="tool-btn" type="button" title="Atalho: Tecla H" aria-label="Ajuda, Regras e Atalhos de Teclado (Atalho tecla H)">
+                    ❓ <span class="btn-text">Ajuda (H)</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Área Principal do Jogo -->
+        <main id="main-game" class="game-board" tabindex="-1">
+
+            <!-- Painel de Placar e Informações da Rodada -->
+            <section class="scoreboard-section" aria-label="Placar e Status da Rodada">
+                <div class="score-card player-score-box">
+                    <span class="score-label">Você</span>
+                    <span id="player-score" class="score-number" aria-label="Seus pontos: 0">0</span>
+                    <span class="score-sub">Objetivo: 12</span>
+                </div>
+
+                <div class="hand-value-box">
+                    <span class="hand-value-label">Valor da Mão</span>
+                    <span id="hand-value" class="hand-value-number" aria-label="Valor desta mão: 1 ponto">1 pt</span>
+                    <div id="trick-history" class="trick-indicators" aria-label="Histórico de quedas desta mão">
+                        <span id="trick-1-result" class="trick-slot">1ª Queda</span>
+                        <span id="trick-2-result" class="trick-slot">2ª Queda</span>
+                        <span id="trick-3-result" class="trick-slot">3ª Queda</span>
+                    </div>
+                </div>
+
+                <div class="score-card cpu-score-box">
+                    <span class="score-label">Computador</span>
+                    <span id="cpu-score" class="score-number" aria-label="Pontos do Computador: 0">0</span>
+                    <span id="cpu-cards-count" class="score-sub">3 cartas</span>
+                </div>
+            </section>
+
+            <!-- Status do Turno -->
+            <div class="turn-status-banner">
+                <p id="round-status" class="status-text" role="status">Embaralhando as cartas...</p>
+            </div>
+
+            <!-- Mesa de Jogo (Vira, Manilhas e Cartas Jogadas) -->
+            <section class="table-area" aria-label="Mesa do Jogo">
+                <!-- Informações do Vira e Manilha -->
+                <div class="table-info-box">
+                    <div class="card-display-wrapper">
+                        <span class="label-info">Carta Vira</span>
+                        <div id="vira-card" class="card card-table" role="img" aria-label="Carta Vira: Carregando..."></div>
+                    </div>
+                    <div id="manilha-info" class="manilha-box" aria-live="polite">
+                        <strong>Manilha: Carregando...</strong>
+                    </div>
+                </div>
+
+                <!-- Centro da Mesa (Cartas Descartadas) -->
+                <div class="table-center">
+                    <div class="played-card-slot">
+                        <span class="slot-label">Computador</span>
+                        <div id="table-cpu-card" class="card card-table empty" role="img" aria-label="Nenhuma carta jogada pelo computador">
+                            <span class="empty-placeholder">Mesa vaga</span>
+                        </div>
+                    </div>
+
+                    <div class="table-vs" aria-hidden="true">VS</div>
+
+                    <div class="played-card-slot">
+                        <span class="slot-label">Sua Carta</span>
+                        <div id="table-player-card" class="card card-table empty" role="img" aria-label="Nenhuma carta sua jogada">
+                            <span class="empty-placeholder">Mesa vaga</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ações e Mão do Jogador -->
+            <section class="player-zone" aria-label="Sua Mão e Ações de Jogo">
+                <div class="player-controls-bar">
+                    <button id="btn-truco" class="action-btn btn-truco" type="button" aria-label="Pedir Truco (Atalho tecla T)">
+                        ⚡ Pedir TRUCO! (Tecla T)
+                    </button>
+
+                    <button id="btn-cover-card" class="action-btn btn-cover" type="button" aria-pressed="false" aria-label="Jogar próxima carta coberta (virada para baixo) (Atalho tecla O)">
+                        🙈 Jogar Coberta (Tecla O)
+                    </button>
+                </div>
+
+                <div class="player-hand-container">
+                    <h2 class="section-subtitle">Suas Cartas (Pressione 1, 2 ou 3 para jogar):</h2>
+                    <div id="player-hand" class="cards-hand" role="group" aria-label="Suas cartas na mão">
+                        <!-- Cartas geradas dinamicamente via JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Log de Acontecimentos / Histórico -->
+            <section class="game-log-section" aria-label="Histórico de Jogadas">
+                <h2 class="log-title">Histórico da Partida:</h2>
+                <div id="game-log" class="log-box" role="log" aria-live="polite"></div>
+            </section>
+        </main>
+
+        <!-- ========================================== -->
+        <!-- DIÁLOGOS MODAIS ACESSÍVEIS (<dialog>)      -->
+        <!-- ========================================== -->
+
+        <!-- Diálogo de Resposta ao Desafio de Truco -->
+        <dialog id="truco-challenge-dialog" class="game-modal" aria-labelledby="truco-dialog-title">
+            <div class="modal-content">
+                <h2 id="truco-dialog-title" class="modal-title">⚡ Desafio de TRUCO!</h2>
+                <p id="truco-prompt-text" class="modal-desc">O Computador pediu Truco!</p>
+
+                <div class="modal-actions">
+                    <button id="btn-accept-truco" class="modal-btn btn-accept" type="button">
+                        ✓ Aceitar (Tecla A)
+                    </button>
+                    <button id="btn-fold-truco" class="modal-btn btn-fold" type="button">
+                        ✕ Correr (Tecla C)
+                    </button>
+                    <button id="btn-raise-truco" class="modal-btn btn-raise" type="button">
+                        ⚡ Pedir Seis! (Tecla R)
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Diálogo de Decisão da Mão de 11 -->
+        <dialog id="mao11-dialog" class="game-modal" aria-labelledby="mao11-title">
+            <div class="modal-content">
+                <h2 id="mao11-title" class="modal-title">🃏 Mão de 11!</h2>
+                <p class="modal-desc">
+                    Você atingiu 11 pontos! Analise suas cartas e o Vira.
+                    Esta mão vale 3 pontos. Você pode jogar ou correr dando 1 ponto para o adversário.
+                </p>
+                <div class="modal-actions">
+                    <button id="btn-play-mao11" class="modal-btn btn-accept" type="button">
+                        ✓ Jogar Mão de 11 (Tecla J)
+                    </button>
+                    <button id="btn-fold-mao11" class="modal-btn btn-fold" type="button">
+                        ✕ Correr da Mão (Tecla C)
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Diálogo de Fim de Jogo -->
+        <dialog id="game-over-dialog" class="game-modal" aria-labelledby="game-over-title">
+            <div class="modal-content">
+                <h2 id="game-over-title" class="modal-title">Fim de Jogo!</h2>
+                <p id="game-over-msg" class="modal-desc">Resultado da partida...</p>
+                <div class="modal-actions">
+                    <button id="btn-restart-game" class="modal-btn btn-restart" type="button">
+                        🔄 Jogar Novamente
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Diálogo de Ajuda, Regras e Atalhos -->
+        <dialog id="help-dialog" class="game-modal" aria-labelledby="help-title">
+            <div class="modal-content">
+                <h2 id="help-title" class="modal-title">📖 Ajuda, Regras e Atalhos do Truco Paulista</h2>
+                <div class="help-scroll-area">
+                    <section>
+                        <h3>⌨️ Atalhos de Teclado</h3>
+                        <ul class="help-list">
+                            <li><kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>: Jogar a 1ª, 2ª ou 3ª carta da sua mão.</li>
+                            <li><kbd>T</kbd>: Pedir Truco ou Aumentar a aposta (Seis, Nove, Doze).</li>
+                            <li><kbd>A</kbd>: Aceitar desafio de Truco feito pelo adversário.</li>
+                            <li><kbd>C</kbd>: Correr (fugir) de desafio de Truco ou Mão de 11.</li>
+                            <li><kbd>R</kbd>: Retrucar / Aumentar desafio (ex: pedir Seis contra Truco).</li>
+                            <li><kbd>O</kbd>: Ativar/desativar modo Carta Coberta (a partir da 2ª queda).</li>
+                            <li><kbd>S</kbd>: Ouvir resumo completo da partida no leitor de tela / voz.</li>
+                            <li><kbd>M</kbd>: Ligar ou desligar Efeitos Sonoros.</li>
+                            <li><kbd>V</kbd>: Ligar ou desligar Narração de Voz falada.</li>
+                            <li><kbd>H</kbd> ou <kbd>?</kbd>: Abrir ou fechar esta janela de ajuda.</li>
+                            <li><kbd>Esc</kbd>: Fechar esta janela de ajuda.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h3>🃏 Regras do Truco Paulista</h3>
+                        <p><strong>Hierarquia das Cartas Normais (da mais fraca à mais forte):</strong></p>
+                        <p>4 &lt; 5 &lt; 6 &lt; 7 &lt; Q (Dama) &lt; J (Valete) &lt; K (Rei) &lt; A &lt; 2 &lt; 3</p>
+                        <p><strong>Manilhas:</strong> A carta que vem imediatamente após o Vira é a Manilha da rodada. Elas são as cartas mais fortes da mão e sua força é definida pelo naipe:</p>
+                        <ol>
+                            <li>♣ <strong>Zap (Paus):</strong> A mais forte de todas.</li>
+                            <li>♥ <strong>Copeta (Copas):</strong> A segunda mais forte.</li>
+                            <li>♠ <strong>Espadilha (Espadas):</strong> A terceira mais forte.</li>
+                            <li>♦ <strong>Pica-fumo (Ouros):</strong> A quarta mais forte.</li>
+                        </ol>
+                        <p><strong>Como vencer uma mão:</strong> A mão é disputada em melhor de 3 quedas. Quem vencer duas quedas leva os pontos da mão. Em caso de empate na 1ª queda, quem vencer a 2ª ganha a mão!</p>
+                        <p><strong>Objetivo:</strong> O primeiro jogador a atingir 12 pontos é o grande campeão!</p>
+                    </section>
+                </div>
+                <div class="modal-actions">
+                    <button id="btn-close-help" class="modal-btn btn-accept" type="button">
+                        Entendi / Fechar (Esc)
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Rodapé com Créditos e Acessibilidade -->
+        <footer class="game-footer">
+            <p>Desenvolvido com foco total em Acessibilidade e Inclusão (WCAG 2.2 AAA).</p>
+            <p>Atalhos rápidos: Pressione <kbd>S</kbd> para resumo, <kbd>H</kbd> para ajuda, <kbd>1-3</kbd> para jogar.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts do Sistema de Áudio, Acessibilidade e Motor do Jogo -->
+    <script src="audio.js"></script>
+    <script src="accessibility.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
